@@ -8,9 +8,18 @@ class PokemonSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def to_internal_value(self, data):
-        if 'type' in data and isinstance(data['type'], list):
-            data['type'] = ", ".join(data['type'])
-        return super().to_internal_value(data)
+        mutable_data = data.copy() if hasattr(data, 'copy') else dict(data)
+        if 'type' in mutable_data and isinstance(mutable_data['type'], list):
+            mutable_data['type'] = ", ".join(mutable_data['type'])
+        return super().to_internal_value(mutable_data)
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        
+        if representation.get('type'):
+            representation['type'] = [t.strip() for t in representation['type'].split(',')]
+            
+        return representation
     
 class UserSerializer(serializers.ModelSerializer):
     class Meta(object):
