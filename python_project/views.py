@@ -47,18 +47,19 @@ def test_token(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_all_pokemon(request):
-    current_user = request.user
-    print(f"Request made by: {current_user.username}")
-    
-    pokemon_queryset = Pokemon.objects.all().order_by('-id')
-    serializer = PokemonSerializer(pokemon_queryset, many=True)
-    pokedex_map = {str(p['id']): p for p in serializer.data}
-    return Response(pokedex_map) 
+        pokemon_queryset = Pokemon.objects.all()
+
+        # Turn them into JSON using the Serializer
+        # We use many=True because it's a list
+        serializer = PokemonSerializer(pokemon_queryset, many=True)
+        pokedex_map = {str(p['id']): p for p in serializer.data}
+        return Response(pokedex_map)  
     
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_pokemon(request, pokemon_id):
     try:
+        # Fetch the specific Pokemon by ID
         pokemon = Pokemon.objects.get(id = pokemon_id)
         serializer = PokemonSerializer(pokemon)
         return Response(serializer.data)
@@ -68,10 +69,13 @@ def get_pokemon(request, pokemon_id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def post_pokemon(request):
+        # Use the Serializer to validate and save incoming data
     serializer = PokemonSerializer(data=request.data)
 
     if serializer.is_valid():
+            # This saves the data to db.sqlite3!
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+        # If the data sent was wrong, tell Flutter what happened
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
