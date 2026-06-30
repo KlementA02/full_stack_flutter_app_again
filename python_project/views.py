@@ -1,7 +1,8 @@
 # from django.shortcuts import render
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Pokemon  
 from .serializers import PokemonSerializer,UserSerializer  
@@ -44,6 +45,7 @@ def test_token(request):
     return Response({})
     
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_all_pokemon(request):
         pokemon_queryset = Pokemon.objects.all()
 
@@ -54,6 +56,7 @@ def get_all_pokemon(request):
         return Response(pokedex_map)  
     
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_pokemon(request, pokemon_id):
     try:
         # Fetch the specific Pokemon by ID
@@ -64,6 +67,7 @@ def get_pokemon(request, pokemon_id):
         return Response({'error': 'Pokemon not found'}, status=status.HTTP_404_NOT_FOUND)
     
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def post_pokemon(request):
         # Use the Serializer to validate and save incoming data
     serializer = PokemonSerializer(data=request.data)
